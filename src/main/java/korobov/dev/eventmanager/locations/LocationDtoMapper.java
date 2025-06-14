@@ -15,6 +15,17 @@ public class LocationDtoMapper {
         );
     }
 
+    public Location fromCreateDto(LocationCreateDto dto) {
+        // id = null — его присвоит JPA при сохранении
+        return new Location(
+                null,
+                dto.name(),
+                dto.address(),
+                dto.capacity(),
+                dto.description()
+        );
+    }
+
     public LocationDto toDto(Location location) {
         return new LocationDto(
                 location.id(),

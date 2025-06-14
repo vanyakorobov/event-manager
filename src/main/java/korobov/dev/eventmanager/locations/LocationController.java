@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import korobov.dev.eventmanager.locations.LocationCreateDto;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
@@ -34,12 +35,15 @@ public class LocationController {
 
     @PostMapping
     public ResponseEntity<LocationDto> createLocation(
-            @RequestBody @Valid LocationDto locationDto
+            @RequestBody @Valid LocationCreateDto createDto
     ) {
-        log.info("Get request for location create: locationDto={}", locationDto);
-        var createdLocation = locationService.createLocation(dtoMapper.toDomain(locationDto));
-        return ResponseEntity.status(201)
-                .body(dtoMapper.toDto(createdLocation));
+        log.info("POST /locations — create request: createDto={}", createDto);
+        Location toSave = dtoMapper.fromCreateDto(createDto);
+        var createdLocation = locationService.createLocation(toSave);
+        LocationDto responseDto = dtoMapper.toDto(createdLocation);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(responseDto);
     }
 
     @DeleteMapping("/{locationId}")
@@ -66,15 +70,16 @@ public class LocationController {
     @PutMapping("/{locationId}")
     public ResponseEntity<LocationDto> updateLocation(
             @PathVariable("locationId") Long locationId,
-            @RequestBody @Valid LocationDto updateLocationDto
+            @RequestBody @Valid LocationCreateDto updateDto
     ) {
-        log.info("Get request for update location: locationId={}, updateLocationDto={}",
-                locationId, updateLocationDto);
-        var updatedLocation = locationService.updateLocation(
-                dtoMapper.toDomain(updateLocationDto),
-                locationId
-        );
-        return ResponseEntity.ok(dtoMapper.toDto(updatedLocation));
+        log.info("PUT /locations/{} — update request: updateDto={}",
+                locationId, updateDto);
+        Location toUpdate = dtoMapper.fromCreateDto(updateDto);
+        var updatedLocation = locationService.updateLocation(toUpdate, locationId);
+        LocationDto responseDto = dtoMapper.toDto(updatedLocation);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
     }
 
 }
